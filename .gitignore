@@ -1,0 +1,47 @@
+# ---- OS ----
+.DS_Store
+
+# ---- IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# ---- Java / Spring Boot (api/) ----
+api/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+replay_pid*
+
+# ---- Maven ----
+api/.mvn/wrapper/maven-wrapper.jar
+api/.mvn/wrapper/maven-wrapper.properties
+!api/mvnw
+!api/mvnw.cmd
+
+# ---- Node / Next.js (frontend/) ----
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# ---- Environment / Secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Misc ----
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
