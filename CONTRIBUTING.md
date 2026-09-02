@@ -69,8 +69,8 @@ The frontend runs at `http://localhost:3000`.
 
 ## Development Workflow
 
-1. Pick an issue or feature to work on, or create one first.
-2. Create a feature branch from the latest `main` (see [Branching Strategy](#branching-strategy)).
+1. Pick an issue or feature to work on from the [project board](https://github.com/users/Nisaljayarathna12/projects/1), or create one first.
+2. Create a feature branch from the latest `main`, named after the issue (see [Branching Strategy](#branching-strategy)).
 3. Make focused, small changes with clear commit messages (see [Commit Guidelines](#commit-guidelines)).
 4. Run the relevant tests and linting for the part you changed.
 5. Push your branch and open a Pull Request (see [Pull Request Guidelines](#pull-request-guidelines)).
@@ -78,23 +78,38 @@ The frontend runs at `http://localhost:3000`.
 
 ## Branching Strategy
 
-- `main` — the stable branch. Always deployable.
-- Feature branches: `feature/<short-description>`
-- Bug fixes: `fix/<short-description>`
-- Chores/code quality: `chore/<short-description>`
-- Docs: `docs/<short-description>`
+Branches are named after their corresponding GitHub issue, using the format
+`<issue-number>-<type>-<short-description>`.
 
-Name branches with lowercase, hyphenated words:
+- `main` — the stable branch. Always deployable.
+- Feature branches: `<issue-number>-<type>-<short-description>`
+
+The `<type>` values map to the GitHub issue labels used on the project board:
+
+| Type        | Purpose                                             | Example branch                                         |
+|-------------|-----------------------------------------------------|--------------------------------------------------------|
+| `epic`      | Large body of work spanning multiple user stories   | `1-epic-infrastructure-setup`                          |
+| `feature`   | A user story / new feature                          | `14-feature-user-registration`                        |
+| `bug`       | A bug fix                                           | `43-bug-fix-uat-issues`                               |
+| `docs`      | Documentation only changes                          | `45-docs-final-documentation`                         |
+| `chore`     | Routine tasks, tooling, dependency bumps            | `11-chore-db-schema-migrations`                       |
+
+Name branches with lowercase, hyphenated words, prefixed by the issue number:
 
 ```bash
-# Good
-git checkout -b feature/user-authentication
-git checkout -b fix/login-validation
-git checkout -b docs/setup-instructions
+# Good — issue #14 (User registration)
+git checkout -b 14-feature-user-registration
+
+# Good — issue #1 (Infrastructure & Setup epic)
+git checkout -b 1-epic-infrastructure-setup
+
+# Good — issue #21 (Search products by name)
+git checkout -b 21-feature-search-products
 
 # Bad
 git checkout -b mychanges
-git checkout -b feature/My_Changes_Here
+git checkout -b user-registration
+git checkout -b 14-User-Registration_Here
 ```
 
 Always branch from the latest `main`:
@@ -102,7 +117,7 @@ Always branch from the latest `main`:
 ```bash
 git checkout main
 git pull origin main
-git checkout -b feature/my-feature
+git checkout -b 14-feature-user-registration
 ```
 
 ## Commit Guidelines
