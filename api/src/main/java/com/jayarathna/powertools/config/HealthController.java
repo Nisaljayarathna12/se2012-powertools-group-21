@@ -1,4 +1,4 @@
-package com.jayarathna.powertools.controller;
+package com.jayarathna.powertools.config;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
