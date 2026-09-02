@@ -11,3 +11,13 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  info:
+    title: PowerTools API
+    description: REST API for the PowerTools e-commerce platform
+    version: 0.0.1-SNAPSHOT
