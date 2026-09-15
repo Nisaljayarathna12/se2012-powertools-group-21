@@ -83,3 +83,6 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stray nested copy of the repo
+se2012-powertools-group-21/

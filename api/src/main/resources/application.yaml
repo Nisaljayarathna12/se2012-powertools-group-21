@@ -8,9 +8,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     open-in-view: false
   flyway:
     enabled: true
+    ignore-migration-patterns: "*:missing"
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:powertools-super-secret-jwt-signing-key-change-me-in-production-2026}
+    expiration-ms: 86400000
 
 springdoc:
   swagger-ui:
