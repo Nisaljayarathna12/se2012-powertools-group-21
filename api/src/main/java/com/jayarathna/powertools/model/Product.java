@@ -13,7 +13,7 @@ public class Product {
     private Integer productId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "categoryId")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(nullable = false)

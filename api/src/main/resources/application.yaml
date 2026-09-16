@@ -9,7 +9,9 @@ spring:
     hibernate:
       ddl-auto: validate
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate.type.preferred_uuid_jdbc_type: CHAR
     open-in-view: false
   flyway:
     enabled: true
