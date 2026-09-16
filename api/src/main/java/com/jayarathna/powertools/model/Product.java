@@ -1,6 +1,7 @@
 package com.jayarathna.powertools.model;
 
 import jakarta.persistence.*;
+import com.jayarathna.powertools.feature.product.Category;
 import java.math.BigDecimal;
 
 @Entity
