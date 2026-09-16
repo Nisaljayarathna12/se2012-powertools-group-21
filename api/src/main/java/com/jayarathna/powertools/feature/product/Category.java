@@ -1,5 +1,6 @@
 package com.jayarathna.powertools.feature.product;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,9 +21,12 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "category_id")
     private UUID categoryId;
 
+    @Column(name = "category_name")
     private String categoryName;
 
+    @Column(name = "category_description")
     private String categoryDescription;
 }

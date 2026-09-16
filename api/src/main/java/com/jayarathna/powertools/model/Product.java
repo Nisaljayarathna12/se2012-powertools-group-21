@@ -10,6 +10,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Integer productId;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -22,9 +23,10 @@ public class Product {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @Column(nullable = false)
+    @Column(name = "stock_qty", nullable = false)
     private Integer stockQty = 0;
 
+    @Column(name = "image_url")
     private String imageUrl;
 
     private String description;
