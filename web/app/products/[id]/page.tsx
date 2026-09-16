@@ -1,15 +1,14 @@
 "use client"
 
-import { use, useCallback, useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import { fetchProduct, type Product } from "@/lib/api"
 import { formatPrice } from "@/lib/format"
-import { isCustomerLoggedIn } from "@/lib/auth"
+import { useIsLoggedIn } from "@/lib/auth"
 
 function StockStatus({ stockQty }: { stockQty: number }) {
   return stockQty > 0 ? (
@@ -36,28 +35,28 @@ export default function ProductDetailPage({
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [loggedIn, setLoggedIn] = useState(false)
+  const loggedIn = useIsLoggedIn()
 
-  const loadProduct = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-    try {
-      const res = await fetchProduct(productId)
-      setProduct(res)
-    } catch {
-      setError(true)
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    let cancelled = false
+
+    fetchProduct(productId)
+      .then((res) => {
+        if (cancelled) return
+        setProduct(res)
+        setError(false)
+      })
+      .catch(() => {
+        if (!cancelled) setError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
     }
   }, [productId])
-
-  useEffect(() => {
-    loadProduct()
-  }, [loadProduct])
-
-  useEffect(() => {
-    setLoggedIn(isCustomerLoggedIn())
-  }, [])
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,22 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { clearToken, getToken } from "@/lib/auth"
+import { clearToken, useIsLoggedIn } from "@/lib/auth"
 
 export function SiteHeader() {
   const router = useRouter()
-  const [loggedIn, setLoggedIn] = useState(false)
-
-  useEffect(() => {
-    setLoggedIn(Boolean(getToken()))
-  }, [])
+  const loggedIn = useIsLoggedIn()
 
   function handleLogout() {
     clearToken()
-    setLoggedIn(false)
     router.push("/")
   }
 

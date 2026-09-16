@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { ProductGrid } from "@/components/product-grid"
 import { Pagination } from "@/components/pagination"
 import { EmptyState } from "@/components/empty-state"
@@ -14,23 +14,28 @@ export default function ProductsPage() {
   const [data, setData] = useState<ProductResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-
-  const loadProducts = useCallback(async (pageNum: number) => {
-    setLoading(true)
-    setError(false)
-    try {
-      const res = await fetchProducts(pageNum, PRODUCTS_PER_PAGE)
-      setData(res)
-    } catch {
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
-    loadProducts(page)
-  }, [page, loadProducts])
+    let cancelled = false
+
+    fetchProducts(page, PRODUCTS_PER_PAGE)
+      .then((res) => {
+        if (cancelled) return
+        setData(res)
+        setError(false)
+      })
+      .catch(() => {
+        if (!cancelled) setError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [page, reloadKey])
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +48,7 @@ export default function ProductsPage() {
         </div>
 
         {error ? (
-          <ErrorState onRetry={() => loadProducts(page)} />
+          <ErrorState onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading && !data ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
