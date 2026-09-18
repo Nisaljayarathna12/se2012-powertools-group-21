@@ -5,12 +5,28 @@ spring:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:powertools}?createDatabaseIfNotExist=true&useSSL=${DB_SSL:false}&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
+    hikari:
+      initialization-fail-timeout: -1
+      connection-timeout: 30000
+      validation-timeout: 5000
+      max-lifetime: 1800000
+      maximum-pool-size: 10
   jpa:
     hibernate:
       ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate.type.preferred_uuid_jdbc_type: CHAR
     open-in-view: false
   flyway:
     enabled: true
+    ignore-migration-patterns: "*:missing"
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:powertools-super-secret-jwt-signing-key-change-me-in-production-2026}
+    expiration-ms: 86400000
 
 springdoc:
   swagger-ui:
