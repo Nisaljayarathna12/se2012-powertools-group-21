@@ -1,25 +1,47 @@
 "use client"
 
 import { use, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Package } from "lucide-react"
+import { ArrowLeft, Package, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { fetchProduct, type Product } from "@/lib/api"
+import { StockBadge } from "@/components/stock-badge"
+import { ConfirmDialog } from "@/components/confirm-dialog"
+import { AddToCart } from "@/components/add-to-cart"
+import {
+  ApiError,
+  deleteProduct,
+  fetchProduct,
+  type Product,
+} from "@/lib/api"
 import { formatPrice } from "@/lib/format"
-import { useIsLoggedIn } from "@/lib/auth"
+import { getStockStatus } from "@/lib/stock"
+import { clearToken, useIsLoggedIn, useRole } from "@/lib/auth"
 
-function StockStatus({ stockQty }: { stockQty: number }) {
-  return stockQty > 0 ? (
-    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
-      <span className="h-2 w-2 rounded-full bg-emerald-500" />
-      In stock ({stockQty} available)
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-destructive">
-      <span className="h-2 w-2 rounded-full bg-destructive" />
-      Out of stock
+function StockInfo({ stockQty }: { stockQty: number }) {
+  const status = getStockStatus(stockQty)
+
+  if (status === "out-of-stock") {
+    return (
+      <span className="text-sm text-muted-foreground">
+        Currently unavailable
+      </span>
+    )
+  }
+
+  if (status === "low-stock") {
+    return (
+      <span className="text-sm font-medium text-amber-600 dark:text-amber-500">
+        Only {stockQty} left in stock
+      </span>
+    )
+  }
+
+  return (
+    <span className="text-sm text-muted-foreground">
+      {stockQty} units available
     </span>
   )
 }
@@ -35,7 +57,39 @@ export default function ProductDetailPage({
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const loggedIn = useIsLoggedIn()
+  const role = useRole()
+  const isAdmin = role === "ADMIN"
+  const isCustomer = role === "CUSTOMER"
+  const router = useRouter()
+
+  async function handleDelete() {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteProduct(productId)
+      setConfirmOpen(false)
+      router.push("/products")
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        clearToken()
+        router.replace("/login")
+        return
+      }
+      if (err instanceof ApiError && err.status === 403) {
+        setDeleteError("You do not have permission to delete products.")
+      } else {
+        setDeleteError(
+          err instanceof Error ? err.message : "Failed to delete product"
+        )
+      }
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -113,7 +167,10 @@ export default function ProductDetailPage({
                   {product.name}
                 </h1>
                 <p className="text-2xl font-bold">{formatPrice(product.price)}</p>
-                <StockStatus stockQty={product.stockQty} />
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <StockBadge stockQty={product.stockQty} />
+                  <StockInfo stockQty={product.stockQty} />
+                </div>
               </div>
 
               <div className="rounded-xl border bg-card p-6">
@@ -125,15 +182,59 @@ export default function ProductDetailPage({
                 </p>
               </div>
 
-              {loggedIn && (
-                <Button size="lg" className="w-full sm:w-auto">
-                  Add to Cart
-                </Button>
-              )}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {loggedIn && isCustomer ? (
+                  <AddToCart product={product} />
+                ) : null}
+                {isAdmin && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    nativeButton={false}
+                    render={
+                      <Link
+                        href={`/admin/products/${product.productId}/edit`}
+                      />
+                    }
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
+                )}
+                {isAdmin && (
+                  <Button
+                    size="lg"
+                    variant="destructive"
+                    className="w-full sm:w-auto"
+                    type="button"
+                    onClick={() => {
+                      setDeleteError(null)
+                      setConfirmOpen(true)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         )}
       </div>
+
+      {product ? (
+        <ConfirmDialog
+          open={confirmOpen}
+          title={`Delete "${product.name}"?`}
+          description="This will remove the product from the catalogue. Customers will no longer see it, and the action cannot be undone."
+          confirmLabel="Delete"
+          busy={deleting}
+          error={deleteError}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }

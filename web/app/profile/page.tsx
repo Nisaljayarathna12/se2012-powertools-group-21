@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,12 +14,16 @@ import {
 } from "@/components/ui/card"
 import {
   ApiError,
+  fetchCustomerOrders,
   fetchProfile,
   updateProfile,
+  type AdminOrder,
   type User,
 } from "@/lib/api"
 import { clearToken, getToken } from "@/lib/auth"
 import { cn } from "@/lib/utils"
+import { formatPrice } from "@/lib/format"
+import { statusVariant } from "@/lib/order-status"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -41,6 +46,9 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [orders, setOrders] = useState<AdminOrder[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(true)
+  const [ordersError, setOrdersError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!getToken()) {
@@ -76,6 +84,41 @@ export default function ProfilePage() {
       cancelled = true
     }
   }, [router])
+
+  useEffect(() => {
+    if (!user || user.role !== "CUSTOMER") return
+
+    let cancelled = false
+
+    fetchCustomerOrders()
+      .then((res) => {
+        if (cancelled) return
+        setOrders(res)
+        setOrdersError(null)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        if (err instanceof ApiError && err.status === 401) {
+          clearToken()
+          router.replace("/login")
+          return
+        }
+        if (err instanceof ApiError && err.status === 403) {
+          setOrdersError("Only customers have order history.")
+          return
+        }
+        setOrdersError(
+          err instanceof Error ? err.message : "Failed to load your orders"
+        )
+      })
+      .finally(() => {
+        if (!cancelled) setOrdersLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [user, router])
 
   function validate(): FormErrors {
     const next: FormErrors = {}
@@ -160,8 +203,9 @@ export default function ProfilePage() {
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background px-4 py-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
+      <div className="w-full max-w-md space-y-6">
+        <Card>
+          <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle className="text-xl">Profile</CardTitle>
             {user ? <Badge variant="outline">{user.role}</Badge> : null}
@@ -243,6 +287,66 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      {user?.role === "CUSTOMER" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Order history</CardTitle>
+            <CardDescription>
+              Track the progress of your orders.
+            </CardDescription>
+            <Link href="/orders" className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">
+              View all orders
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {ordersLoading && orders.length === 0 ? (
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-12 animate-pulse rounded bg-muted"
+                  />
+                ))}
+              </div>
+            ) : ordersError ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              >
+                {ordersError}
+              </div>
+            ) : orders.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                You haven&apos;t placed any orders yet.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {orders.map((order) => (
+                  <li
+                    key={order.orderId}
+                    className="rounded-lg border p-3 text-sm"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-medium">#{order.orderId}</p>
+                      <Badge variant={statusVariant(order.status)}>
+                        {order.status}
+                      </Badge>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-muted-foreground">
+                      <span>{order.orderDate}</span>
+                      <span className="font-semibold text-foreground">
+                        {formatPrice(order.totalAmount)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+      </div>
     </div>
   )
 }

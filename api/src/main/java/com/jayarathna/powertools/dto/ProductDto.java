@@ -12,6 +12,7 @@ public class ProductDto {
     private Integer stockQty;
     private String imageUrl;
     private String description;
+    private String categoryId;
     private String categoryName;
 
     public ProductDto(Product product) {
@@ -21,6 +22,9 @@ public class ProductDto {
         this.stockQty = product.getStockQty();
         this.imageUrl = product.getImageUrl();
         this.description = product.getDescription();
+        this.categoryId = product.getCategory() != null
+                ? product.getCategory().getCategoryId().toString()
+                : null;
         this.categoryName = product.getCategory() != null
                 ? product.getCategory().getCategoryName()
                 : null;
@@ -80,5 +84,13 @@ public class ProductDto {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
     }
 }
