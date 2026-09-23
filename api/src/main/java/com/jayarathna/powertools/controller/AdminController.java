@@ -1,6 +1,7 @@
 package com.jayarathna.powertools.controller;
 
 import com.jayarathna.powertools.dto.AdminDashboard;
+import com.jayarathna.powertools.dto.AdminOrdersResponse;
 import com.jayarathna.powertools.dto.AdminSummary;
 import com.jayarathna.powertools.dto.CreateProductRequest;
 import com.jayarathna.powertools.dto.OrderResponse;
@@ -15,8 +16,8 @@ import com.jayarathna.powertools.service.AdminDashboardService;
 import com.jayarathna.powertools.service.AuthService;
 import com.jayarathna.powertools.service.OrderService;
 import com.jayarathna.powertools.service.ProductService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/admin")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminController {
 
     private final AuthService authService;
@@ -76,7 +78,7 @@ public class AdminController {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<Page<OrderResponse>> orders(
+    public ResponseEntity<AdminOrdersResponse> orders(
             @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -86,7 +88,8 @@ public class AdminController {
             @RequestParam(defaultValue = "date") String sort,
             @RequestParam(defaultValue = "desc") String direction) {
         authService.currentUser(authorization);
-        return ResponseEntity.ok(orderService.getOrders(status, from, to, sort, direction, page, size));
+        return ResponseEntity.ok(AdminOrdersResponse.from(
+                orderService.getOrders(status, from, to, sort, direction, page, size)));
     }
 
     @PostMapping("/products")

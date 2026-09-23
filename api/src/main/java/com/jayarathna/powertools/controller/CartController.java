@@ -8,6 +8,7 @@ import com.jayarathna.powertools.model.User;
 import com.jayarathna.powertools.service.AuthService;
 import com.jayarathna.powertools.service.CartService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/cart")
+@SecurityRequirement(name = "bearerAuth")
 public class CartController {
 
     private final AuthService authService;

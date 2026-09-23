@@ -268,7 +268,7 @@ export async function fetchAdminOrders(
   }
 
   const data = await res.json()
-  return { ...data, page: data.number }
+  return data as AdminOrdersResponse
 }
 
 export async function updateOrderStatus(

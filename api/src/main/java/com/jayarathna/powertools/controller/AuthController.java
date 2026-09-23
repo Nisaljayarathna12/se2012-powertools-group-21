@@ -9,6 +9,7 @@ import com.jayarathna.powertools.model.User;
 import com.jayarathna.powertools.service.AuthService;
 import com.jayarathna.powertools.service.UserService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,7 @@ public class AuthController {
         return ResponseEntity.ok(userService.login(request));
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile(
             @RequestHeader(value = "Authorization", required = false) String authorization) {
@@ -43,6 +45,7 @@ public class AuthController {
         return ResponseEntity.ok(new UserResponse(user));
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/profile")
     public ResponseEntity<UserResponse> updateProfile(
             @RequestHeader(value = "Authorization", required = false) String authorization,

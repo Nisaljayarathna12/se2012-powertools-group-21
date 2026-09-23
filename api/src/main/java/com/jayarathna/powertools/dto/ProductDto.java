@@ -1,5 +1,6 @@
 package com.jayarathna.powertools.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jayarathna.powertools.model.Product;
 
 import java.math.BigDecimal;
@@ -14,6 +15,10 @@ public class ProductDto {
     private String description;
     private String categoryId;
     private String categoryName;
+
+    @JsonCreator
+    public ProductDto() {
+    }
 
     public ProductDto(Product product) {
         this.productId = product.getProductId();

@@ -1,5 +1,6 @@
 package com.jayarathna.powertools.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jayarathna.powertools.model.User;
 
 public class LoginResponse {
@@ -11,6 +12,7 @@ public class LoginResponse {
     private String email;
     private String role;
 
+    @JsonCreator
     public LoginResponse() {
     }
 

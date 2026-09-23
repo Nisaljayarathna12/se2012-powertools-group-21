@@ -10,6 +10,7 @@ import com.jayarathna.powertools.repository.ProductRepository;
 import com.jayarathna.powertools.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class AdminDashboardService {
         this.lowStockThreshold = lowStockThreshold;
     }
 
+    @Transactional(readOnly = true)
     public AdminDashboard build(User admin) {
         List<OrderResponse> recentOrders = orderRepository.findTop10ByOrderByOrderIdDesc()
                 .stream()
