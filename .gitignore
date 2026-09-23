@@ -59,6 +59,11 @@ next-env.d.ts
 # testing
 /coverage
 
+# playwright
+test-results
+playwright-report
+playwright/.cache
+
 # next.js
 /.next/
 /out/
@@ -83,3 +88,6 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stray nested copy of the repo
+se2012-powertools-group-21/

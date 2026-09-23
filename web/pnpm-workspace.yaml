@@ -1,6 +1,4 @@
-packages: []
-
 allowBuilds:
-  sharp: true
-  unrs-resolver: true
-  msw: false
+  "@parcel/watcher": true
+  "sharp": true
+  "unrs-resolver": true
