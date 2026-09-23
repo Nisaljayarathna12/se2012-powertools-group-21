@@ -1,4 +1,4 @@
-import { request, type FullConfig } from "@playwright/test"
+import { request, type APIRequestContext, type FullConfig } from "@playwright/test"
 
 const API = "http://localhost:8081"
 const ADMIN_EMAIL = "admin@powertools.com"
@@ -21,7 +21,7 @@ const SEED_PRODUCTS: SeedProduct[] = [
 ]
 
 async function ensureProduct(
-  ctx: ReturnType<typeof request.newContext>,
+  ctx: APIRequestContext,
   token: string,
   product: SeedProduct,
 ) {
