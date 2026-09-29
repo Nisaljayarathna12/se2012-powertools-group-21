@@ -63,6 +63,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
         Product product = new Product(category, name, request.price(), request.stockQty(), request.imageUrl());
+        product.setBrand(request.brand().trim());
         product.setDescription(request.description());
 
         return new ProductDto(productRepository.save(product));
@@ -84,6 +85,7 @@ public class ProductService {
 
         product.setCategory(category);
         product.setName(name);
+        product.setBrand(request.brand().trim());
         product.setPrice(request.price());
         product.setStockQty(request.stockQty());
         product.setImageUrl(request.imageUrl());

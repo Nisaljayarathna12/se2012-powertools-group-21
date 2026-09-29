@@ -31,7 +31,7 @@ describe("api client", () => {
     await fetchProducts(2, 9, "hammer", "cat-1")
 
     expect(global.fetch).toHaveBeenCalledWith(
-      `${BASE}/api/products?page=2&size=9&search=hammer&category=cat-1`
+      `${BASE}/api/products?page=2&size=9&search=hammer&categoryId=cat-1`
     )
   })
 

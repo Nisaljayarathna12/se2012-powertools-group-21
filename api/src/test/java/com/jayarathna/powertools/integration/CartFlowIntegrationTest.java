@@ -198,7 +198,7 @@ class CartFlowIntegrationTest extends IntegrationTestBase {
 
     private int createProduct(String name, String price, int stock) {
         CreateProductRequest request = new CreateProductRequest(
-                POWER_DRILLS, name, new BigDecimal(price), stock, null, "cart it product");
+                POWER_DRILLS, name, "Makita", new BigDecimal(price), stock, null, "cart it product");
         ResponseEntity<ProductDto> response =
                 post("/api/admin/products", adminToken(), request, ProductDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);

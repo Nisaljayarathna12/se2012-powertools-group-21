@@ -17,6 +17,10 @@ public record CreateProductRequest(
         @Size(max = 255, message = "Name must be at most 255 characters")
         String name,
 
+        @NotBlank(message = "Brand is required")
+        @Size(max = 120, message = "Brand must be at most 120 characters")
+        String brand,
+
         @NotNull(message = "Price is required")
         @DecimalMin(value = "0.01", message = "Price must be greater than zero")
         BigDecimal price,

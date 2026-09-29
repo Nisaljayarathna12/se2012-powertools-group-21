@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Rotary Hammer">
+  <rect width="400" height="400" fill="#f1f5f9"/>
+  <g fill="none" stroke="#64748b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="150" y="140" width="130" height="110" rx="24" fill="#e2e8f0"/>
+    <path d="M280 195h60"/>
+    <path d="M340 175v40"/>
+  </g>
+  <path d="M150 200H80" stroke="#64748b" stroke-width="12" stroke-linecap="round"/>
+  <path d="M80 182v36" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+  <text x="200" y="330" font-family="system-ui,sans-serif" font-size="26" font-weight="600" fill="#475569" text-anchor="middle">Rotary Hammer</text>
+</svg>

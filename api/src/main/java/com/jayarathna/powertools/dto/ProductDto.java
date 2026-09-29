@@ -9,6 +9,7 @@ public class ProductDto {
 
     private Integer productId;
     private String name;
+    private String brand;
     private BigDecimal price;
     private Integer stockQty;
     private String imageUrl;
@@ -23,6 +24,7 @@ public class ProductDto {
     public ProductDto(Product product) {
         this.productId = product.getProductId();
         this.name = product.getName();
+        this.brand = product.getBrand();
         this.price = product.getPrice();
         this.stockQty = product.getStockQty();
         this.imageUrl = product.getImageUrl();
@@ -49,6 +51,14 @@ public class ProductDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public BigDecimal getPrice() {

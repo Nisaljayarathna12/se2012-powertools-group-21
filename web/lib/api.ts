@@ -29,6 +29,7 @@ export interface Category {
 export interface Product {
   productId: number
   name: string
+  brand: string | null
   price: number
   stockQty: number
   imageUrl: string | null
@@ -73,7 +74,7 @@ export async function fetchProducts(
   }
 
   if (categoryId) {
-    params.set("category", categoryId)
+    params.set("categoryId", categoryId)
   }
 
   const res = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
@@ -325,6 +326,7 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
 export interface CreateProductRequest {
   categoryId: string
   name: string
+  brand: string
   price: number
   stockQty: number
   imageUrl: string | null

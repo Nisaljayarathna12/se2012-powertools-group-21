@@ -56,13 +56,14 @@ class ProductServiceTest {
     private static Product product() {
         Product product = new Product(category(), "Cordless Drill", BigDecimal.valueOf(99.5), 4, "img.png");
         product.setProductId(1);
+        product.setBrand("Makita");
         product.setDescription("desc");
         return product;
     }
 
     private static CreateProductRequest request() {
         return new CreateProductRequest(CATEGORY_ID, "  Cordless Drill  ",
-                BigDecimal.valueOf(99.5), 4, "img.png", "desc");
+                "  Makita  ", BigDecimal.valueOf(99.5), 4, "img.png", "desc");
     }
 
     @Test

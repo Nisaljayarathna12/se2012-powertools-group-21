@@ -32,6 +32,7 @@ const inputClass =
 
 interface FormErrors {
   name?: string
+  brand?: string
   categoryId?: string
   price?: string
   stockQty?: string
@@ -44,6 +45,7 @@ export default function NewProductPage() {
 
   const [categories, setCategories] = useState<Category[]>([])
   const [name, setName] = useState("")
+  const [brand, setBrand] = useState("")
   const [categoryId, setCategoryId] = useState("")
   const [price, setPrice] = useState("")
   const [stockQty, setStockQty] = useState("")
@@ -108,6 +110,10 @@ export default function NewProductPage() {
       next.name = "Name is required"
     }
 
+    if (!brand.trim()) {
+      next.brand = "Brand is required"
+    }
+
     if (!categoryId) {
       next.categoryId = "Category is required"
     }
@@ -146,6 +152,7 @@ export default function NewProductPage() {
       await createProduct({
         categoryId,
         name: name.trim(),
+        brand: brand.trim(),
         price: Number(price),
         stockQty: Number(stockQty),
         imageUrl: imageUrl.trim() ? imageUrl.trim() : null,
@@ -153,6 +160,7 @@ export default function NewProductPage() {
       })
       setSuccess(`Product "${name.trim()}" added successfully.`)
       setName("")
+      setBrand("")
       setPrice("")
       setStockQty("")
       setImageUrl("")
@@ -245,6 +253,27 @@ export default function NewProductPage() {
               {errors.name ? (
                 <p id="name-error" className="text-sm text-destructive">
                   {errors.name}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="brand" className="text-sm font-medium">
+                Brand
+              </label>
+              <input
+                id="brand"
+                type="text"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                aria-invalid={Boolean(errors.brand)}
+                aria-describedby={errors.brand ? "brand-error" : undefined}
+                placeholder="e.g. Bosch"
+                className={cn(inputClass, errors.brand && "border-destructive")}
+              />
+              {errors.brand ? (
+                <p id="brand-error" className="text-sm text-destructive">
+                  {errors.brand}
                 </p>
               ) : null}
             </div>

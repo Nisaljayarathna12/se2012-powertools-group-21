@@ -20,6 +20,9 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "brand", length = 120)
+    private String brand;
+
     @Column(nullable = false)
     private BigDecimal price;
 
@@ -67,6 +70,14 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public BigDecimal getPrice() {

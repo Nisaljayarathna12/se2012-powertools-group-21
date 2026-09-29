@@ -4,12 +4,22 @@ import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Package, Pencil, Trash2 } from "lucide-react"
+import {
+  ArrowLeft,
+  Check,
+  Package,
+  Pencil,
+  RotateCcw,
+  Shield,
+  Trash2,
+  Truck,
+  Zap,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { StockBadge } from "@/components/stock-badge"
-import { ConfirmDialog } from "@/components/confirm-dialog"
 import { AddToCart } from "@/components/add-to-cart"
+import { ConfirmDialog } from "@/components/confirm-dialog"
+import { useCart } from "@/components/showcase/cart-provider"
+import { StarRating } from "@/components/showcase/star-rating"
 import {
   ApiError,
   deleteProduct,
@@ -17,18 +27,28 @@ import {
   type Product,
 } from "@/lib/api"
 import { formatPrice } from "@/lib/format"
+import {
+  getDiscountPercentage,
+  getSpecSnippet,
+  toShowcaseProduct,
+  type ShowcaseProduct,
+} from "@/lib/showcase"
 import { getStockStatus } from "@/lib/stock"
 import { clearToken, useIsLoggedIn, useRole } from "@/lib/auth"
+
+type Tab = "specs" | "warranty"
+
+const TRUST_ICONS = [
+  { icon: Truck, label: "Islandwide Delivery" },
+  { icon: Shield, label: "1-Year Warranty" },
+  { icon: RotateCcw, label: "7-Day Returns" },
+]
 
 function StockInfo({ stockQty }: { stockQty: number }) {
   const status = getStockStatus(stockQty)
 
   if (status === "out-of-stock") {
-    return (
-      <span className="text-sm text-muted-foreground">
-        Currently unavailable
-      </span>
-    )
+    return <span className="text-sm text-muted-foreground">Currently unavailable</span>
   }
 
   if (status === "low-stock") {
@@ -57,6 +77,7 @@ export default function ProductDetailPage({
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>("specs")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -65,6 +86,7 @@ export default function ProductDetailPage({
   const isAdmin = role === "ADMIN"
   const isCustomer = role === "CUSTOMER"
   const router = useRouter()
+  const { addItem } = useCart()
 
   async function handleDelete() {
     setDeleting(true)
@@ -91,6 +113,11 @@ export default function ProductDetailPage({
     }
   }
 
+  async function handleBuyNow() {
+    const added = await addItem(productId)
+    if (added) router.push("/checkout")
+  }
+
   useEffect(() => {
     let cancelled = false
 
@@ -112,129 +139,345 @@ export default function ProductDetailPage({
     }
   }, [productId])
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/products" />} className="mb-6 -ml-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to products
-        </Button>
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl bg-industrial-50 px-4 py-20 text-center">
+        <Package size={48} className="mx-auto mb-4 text-industrial-300" />
+        <h1 className="font-display text-2xl font-bold text-industrial-900">
+          Product Not Found
+        </h1>
+        <p className="mt-2 text-industrial-500">
+          The product you&apos;re looking for doesn&apos;t exist.
+        </p>
+        <Link href="/catalog" className="btn-primary mt-6">
+          Back to Catalog
+        </Link>
+      </div>
+    )
+  }
 
-        {error ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Package className="h-12 w-12 text-muted-foreground mb-4" />
-            <h2 className="text-lg font-semibold">Product not found</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              The product you are looking for does not exist.
-            </p>
-          </div>
-        ) : loading || !product ? (
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="aspect-square animate-pulse rounded-xl bg-muted" />
+  if (loading || !product) {
+    return (
+      <div className="mx-auto max-w-7xl bg-industrial-50 px-4 py-20">
+        <div className="animate-pulse space-y-6">
+          <div className="h-6 w-32 rounded bg-industrial-100" />
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+            <div className="aspect-square rounded-xl bg-industrial-100" />
             <div className="space-y-4">
-              <div className="h-8 w-2/3 animate-pulse rounded bg-muted" />
-              <div className="h-8 w-1/3 animate-pulse rounded bg-muted" />
-              <div className="h-4 w-1/4 animate-pulse rounded bg-muted" />
-              <div className="h-24 w-full animate-pulse rounded bg-muted" />
+              <div className="h-8 w-3/4 rounded bg-industrial-100" />
+              <div className="h-6 w-1/2 rounded bg-industrial-100" />
+              <div className="h-10 w-1/3 rounded bg-industrial-100" />
+              <div className="h-12 w-full rounded bg-industrial-100" />
             </div>
           </div>
-        ) : (
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-              {product.imageUrl ? (
-                <Image
-                  src={product.imageUrl}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground">
-                  No image
-                </div>
-              )}
-            </div>
+        </div>
+      </div>
+    )
+  }
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  {product.categoryName && (
-                    <Badge variant="secondary">{product.categoryName}</Badge>
-                  )}
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {product.name}
-                </h1>
-                <p className="text-2xl font-bold">{formatPrice(product.price)}</p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <StockBadge stockQty={product.stockQty} />
-                  <StockInfo stockQty={product.stockQty} />
-                </div>
-              </div>
+  const outOfStock = product.stockQty <= 0
 
-              <div className="rounded-xl border bg-card p-6">
-                <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
-                  Description
-                </h2>
-                <p className="text-sm leading-relaxed">
-                  {product.description || "No description available."}
-                </p>
-              </div>
+  // Display view: real API fields plus the quarantined presentation attributes
+  // (brand, voltage, specs, rating, image fallback). See lib/mock-attributes.ts.
+  const view: ShowcaseProduct = toShowcaseProduct(product)
+  const discount = getDiscountPercentage(view)
+  const snippet = getSpecSnippet(view)
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                {loggedIn && isCustomer ? (
-                  <AddToCart product={product} />
-                ) : null}
-                {isAdmin && (
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto"
-                    nativeButton={false}
-                    render={
-                      <Link
-                        href={`/admin/products/${product.productId}/edit`}
-                      />
-                    }
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </Button>
-                )}
-                {isAdmin && (
-                  <Button
-                    size="lg"
-                    variant="destructive"
-                    className="w-full sm:w-auto"
-                    type="button"
-                    onClick={() => {
-                      setDeleteError(null)
-                      setConfirmOpen(true)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
-                )}
-              </div>
-            </div>
+  const specEntries: [string, string][] = [
+    ["Product ID", String(product.productId)],
+    ["Brand", view.brand],
+    ["Category", product.categoryName ?? "Uncategorised"],
+    ["Power Source", view.powerSource],
+    ...(view.voltage ? ([["Voltage", view.voltage]] as [string, string][]) : []),
+    ...Object.entries(view.specifications).map(
+      ([key, value]) =>
+        [
+          key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (c) => c.toUpperCase())
+            .trim(),
+          value as string,
+        ] as [string, string]
+    ),
+    ["Price", formatPrice(product.price)],
+    ["Availability", outOfStock ? "Out of stock" : `${product.stockQty} in stock`],
+  ]
+
+  return (
+    <div className="mx-auto max-w-7xl animate-fade-in bg-industrial-50 px-4 py-8">
+      <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-industrial-500">
+        <Link href="/" className="hover:text-safety-600">
+          Home
+        </Link>
+        <span>/</span>
+        <Link href="/catalog" className="hover:text-safety-600">
+          Catalog
+        </Link>
+        {product.categoryName ? (
+          <>
+            <span>/</span>
+            <Link
+              href={`/catalog?category=${product.categoryId}`}
+              className="hover:text-safety-600"
+            >
+              {product.categoryName}
+            </Link>
+          </>
+        ) : null}
+        <span>/</span>
+        <span className="font-medium text-industrial-700">{product.name}</span>
+      </nav>
+
+      <Link
+        href="/catalog"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-industrial-600 hover:text-safety-600"
+      >
+        <ArrowLeft size={16} /> Back to Catalog
+      </Link>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="card relative aspect-square overflow-hidden">
+          <Image
+            src={view.imageUrl}
+            alt={product.name}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover"
+          />
+          {discount ? (
+            <span className="badge absolute left-3 top-3 bg-safety-500 font-bold text-industrial-900">
+              -{discount}%
+            </span>
+          ) : null}
+        </div>
+
+        <div>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="badge bg-industrial-100 text-industrial-600">
+              {product.categoryName ?? "Uncategorised"}
+            </span>
+            <span className="badge bg-safety-500 font-semibold text-industrial-900">
+              {view.brand}
+            </span>
+            {outOfStock ? (
+              <span className="badge bg-red-100 text-red-700">Out of Stock</span>
+            ) : (
+              <span className="badge bg-green-100 text-green-700">
+                <Check size={12} className="mr-1" /> In Stock
+              </span>
+            )}
           </div>
-        )}
+
+          <h1 className="font-display text-2xl font-bold text-industrial-900 lg:text-3xl">
+            {product.name}
+          </h1>
+
+          <div className="mt-2">
+            <StarRating
+              rating={view.rating}
+              count={view.reviewCount}
+              showCount
+            />
+          </div>
+
+          <p className="mt-3 text-sm text-industrial-600">
+            {product.description || "No description available."}
+          </p>
+
+          {view.features.length > 0 ? (
+            <ul className="mt-4 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {view.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-center gap-2 text-sm text-industrial-600"
+                >
+                  <Check size={14} className="text-safety-600" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-6 flex items-end gap-3">
+            {view.originalPrice ? (
+              <span className="text-lg text-industrial-400 line-through">
+                {formatPrice(view.originalPrice)}
+              </span>
+            ) : null}
+            <span className="text-3xl font-bold text-industrial-900">
+              {formatPrice(product.price)}
+            </span>
+          </div>
+
+          {snippet ? (
+            <p className="mt-1 text-xs text-industrial-500">{snippet}</p>
+          ) : null}
+
+          <div className="mt-2">
+            <StockInfo stockQty={product.stockQty} />
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            {loggedIn && isCustomer ? (
+              <>
+                <AddToCart product={product} />
+                <Button
+                  size="lg"
+                  type="button"
+                  onClick={handleBuyNow}
+                  disabled={outOfStock}
+                  className="w-full sm:w-auto"
+                >
+                  <Zap />
+                  Buy Now
+                </Button>
+              </>
+            ) : null}
+            {isAdmin ? (
+              <>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  nativeButton={false}
+                  render={<Link href={`/admin/products/${product.productId}/edit`} />}
+                >
+                  <Pencil />
+                  Edit
+                </Button>
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  className="w-full sm:w-auto"
+                  type="button"
+                  onClick={() => {
+                    setDeleteError(null)
+                    setConfirmOpen(true)
+                  }}
+                >
+                  <Trash2 />
+                  Delete
+                </Button>
+              </>
+            ) : null}
+          </div>
+
+          <div className="mt-6 grid grid-cols-3 gap-3 rounded-lg border border-industrial-200 bg-industrial-50 p-4">
+            {TRUST_ICONS.map((item) => (
+              <div
+                key={item.label}
+                className="flex flex-col items-center gap-1 text-center"
+              >
+                <item.icon size={20} className="text-safety-600" />
+                <span className="text-xs font-medium text-industrial-600">
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {product ? (
-        <ConfirmDialog
-          open={confirmOpen}
-          title={`Delete "${product.name}"?`}
-          description="This will remove the product from the catalogue. Customers will no longer see it, and the action cannot be undone."
-          confirmLabel="Delete"
-          busy={deleting}
-          error={deleteError}
-          onConfirm={handleDelete}
-          onCancel={() => setConfirmOpen(false)}
-        />
-      ) : null}
+      <div className="mt-12">
+        <div className="flex gap-1 border-b border-industrial-200">
+          {(
+            [
+              { key: "specs" as Tab, label: "Technical Specifications" },
+              { key: "warranty" as Tab, label: "Warranty & Service" },
+            ] satisfies { key: Tab; label: string }[]
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={
+                activeTab === tab.key
+                  ? "border-safety-500 text-industrial-900 border-b-2 px-4 py-3 text-sm font-semibold transition-colors"
+                  : "text-industrial-500 hover:text-industrial-700 border-transparent border-b-2 px-4 py-3 text-sm font-semibold transition-colors"
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-6">
+          {activeTab === "specs" ? (
+            <div className="animate-fade-in">
+              <table className="w-full max-w-2xl">
+                <tbody>
+                  {specEntries.map(([key, value], i) => (
+                    <tr
+                      key={key}
+                      className={i % 2 === 0 ? "bg-industrial-50" : "bg-white"}
+                    >
+                      <td className="w-1/3 border-b border-industrial-100 px-4 py-3 text-sm font-medium text-industrial-600">
+                        {key}
+                      </td>
+                      <td className="border-b border-industrial-100 px-4 py-3 text-sm text-industrial-800">
+                        {value}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="max-w-2xl animate-fade-in space-y-4">
+              <div className="flex items-start gap-3">
+                <Shield size={24} className="mt-0.5 shrink-0 text-safety-600" />
+                <div>
+                  <h3 className="font-semibold text-industrial-800">
+                    Manufacturer Warranty
+                  </h3>
+                  <p className="mt-1 text-sm text-industrial-600">
+                    This {product.name} comes with a 1-year manufacturer warranty
+                    covering defects in materials and workmanship. The warranty
+                    is valid from the date of purchase with the original receipt.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check size={24} className="mt-0.5 shrink-0 text-safety-600" />
+                <div>
+                  <h3 className="font-semibold text-industrial-800">
+                    What&apos;s Covered
+                  </h3>
+                  <ul className="mt-1 list-inside list-disc space-y-1 text-sm text-industrial-600">
+                    <li>Manufacturing defects in motor and components</li>
+                    <li>Battery and charger defects (cordless models)</li>
+                    <li>Replacement of faulty parts at no cost</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <RotateCcw size={24} className="mt-0.5 shrink-0 text-safety-600" />
+                <div>
+                  <h3 className="font-semibold text-industrial-800">
+                    Replacement Parts
+                  </h3>
+                  <p className="mt-1 text-sm text-industrial-600">
+                    Genuine replacement parts and accessories are available at
+                    our store. Contact us for parts ordering and repair services.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={`Delete "${product.name}"?`}
+        description="This will remove the product from the catalogue. Customers will no longer see it, and the action cannot be undone."
+        confirmLabel="Delete"
+        busy={deleting}
+        error={deleteError}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

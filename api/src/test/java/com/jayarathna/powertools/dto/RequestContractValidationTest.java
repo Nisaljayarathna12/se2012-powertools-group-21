@@ -65,6 +65,7 @@ class RequestContractValidationTest {
         CreateProductRequest request = new CreateProductRequest(
                 java.util.UUID.randomUUID(),
                 "Cordless Drill",
+                "Makita",
                 BigDecimal.ZERO,
                 -1,
                 null,
@@ -73,6 +74,32 @@ class RequestContractValidationTest {
         Set<ConstraintViolation<CreateProductRequest>> violations = validator.validate(request);
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("price")));
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("stockQty")));
+    }
+
+    @Test
+    void createProductRequiresNameAndBrand() {
+        CreateProductRequest blankBrand = new CreateProductRequest(
+                java.util.UUID.randomUUID(),
+                "Cordless Drill",
+                "   ",
+                BigDecimal.TEN,
+                3,
+                null,
+                null);
+
+        CreateProductRequest blankName = new CreateProductRequest(
+                java.util.UUID.randomUUID(),
+                "",
+                "Makita",
+                BigDecimal.TEN,
+                3,
+                null,
+                null);
+
+        assertTrue(validator.validate(blankBrand).stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("brand")));
+        assertTrue(validator.validate(blankName).stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("name")));
     }
 
     @Test
