@@ -82,7 +82,7 @@ function HeaderInner() {
           <span className="hidden sm:block">
             Islandwide delivery in Sri Lanka | Genuine brands with warranty
           </span>
-          <span className="font-medium text-safety-400">+94 77 123 4567</span>
+          <span className="font-medium text-safety-400">+94 76 677 3047 / +94 35 225 9285</span>
         </div>
       </div>
 

@@ -51,7 +51,7 @@ export function SiteFooter() {
             </div>
             <p className="text-sm leading-relaxed text-industrial-400">
               Your trusted source for genuine power tools and hardware in Sri
-              Lanka. Authorized dealer for Bosch, Makita, DeWalt, and Ingco.
+              Lanka. Authorized dealer for Bosch, Men , Makita, DeWalt, and Ingco.
             </p>
           </div>
 
@@ -79,15 +79,15 @@ export function SiteFooter() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin size={16} className="mt-0.5 shrink-0 text-safety-400" />
-                <span>123 Galle Road, Colombo 04, Sri Lanka</span>
+                <span>F/5/1,Polambegoda,ussapitiya</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={16} className="shrink-0 text-safety-400" />
-                <span>+94 77 123 4567</span>
+                <span>+94 76 677 3047 / +94 35 225 9285</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={16} className="shrink-0 text-safety-400" />
-                <span>info@jayaratna-tools.lk</span>
+                <span>info@jayarathnapowertools@gmail.com</span>
               </li>
             </ul>
           </div>

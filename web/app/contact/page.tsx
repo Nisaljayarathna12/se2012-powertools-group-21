@@ -5,20 +5,20 @@ const CHANNELS = [
   {
     icon: Phone,
     label: "Call us",
-    value: "+94 77 123 4567",
-    href: "tel:+94771234567",
+    value: "+94 76 677 3047",
+    href: "tel:+94766773047",
   },
   {
     icon: Mail,
     label: "Email us",
-    value: "sales@jayarathnahardware.lk",
-    href: "mailto:sales@jayarathnahardware.lk",
+    value: "jayarathnapowertools@gmail.com",
+    href: "mailto:jayarathnapowertools@gmail.com",
   },
   {
     icon: MapPin,
     label: "Visit our store",
-    value: "No. 142, Main Street, Colombo 03, Sri Lanka",
-    href: "https://maps.google.com/?q=Colombo+Sri+Lanka",
+    value: "F/5/1,Polambegoda,ussapitiya",
+    href: "https://maps.app.goo.gl/bo8Bszp2Z81jbxAe8",
   },
 ]
 
